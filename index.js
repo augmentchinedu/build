@@ -48,53 +48,8 @@ const packagePath = `/workspace/package.json`;
 await writeFile(packagePath, JSON.stringify(packageJson, null, 2));
 console.log(`package.json generated at ${packagePath}`);
 
-// 3️⃣ Create Dockerfile for any environment
-const dockerfileContent = `
-FROM node:20-alpine
+// Write client.name to a file for Docker ENV
+const namePath = `/workspace/CLIENT_NAME`;
+await writeFile(namePath, client.name, 'utf-8');
+console.log(`client.name saved to ${namePath}`);
 
-WORKDIR /app
-
-COPY package.json ./
-
-RUN npm install --omit=dev
-
-COPY . .
-
-EXPOSE 3000
-
-ENV PORT=3000
-ENV NODE_ENV=production
-ENV NAME=${client.name}
-
-CMD ["node", "index.js"]
-`.trim();
-
-const dockerfilePath = `/workspace/Dockerfile`;
-await writeFile(dockerfilePath, dockerfileContent);
-console.log(`Dockerfile generated at ${dockerfilePath}`);
-
-// 4️⃣ Generate app.yaml only if target is GAE
-// 4️⃣ Generate app.yaml only if target is GAE
-if (process.env.DEPLOY_TARGET === "gae") {
-  console.log("GAE deployment target detected. Generating app.yaml (Flex)...");
-
-  // If id is "express", use "default", otherwise use id
-  const serviceName = id === "express" ? "default" : id;
-
-  const appYamlContent =
-    "runtime: custom\n" +
-    "env: flex\n" +
-    `service: ${serviceName}\n` +
-    "\n" +
-    "automatic_scaling:\n" +
-    "  min_num_instances: 1\n" +
-    "  max_num_instances: 3\n";
-
-  await writeFile("/workspace/app.yaml", appYamlContent);
-
-  console.log(
-    `app.yaml generated for App Engine Flex with service: ${serviceName}`
-  );
-} else {
-  console.log("DEPLOY_TARGET is not 'gae'. Skipping app.yaml generation.");
-}
