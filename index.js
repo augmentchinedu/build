@@ -53,18 +53,15 @@ console.log("Generating app.yaml (Flex)...");
 // If id is "express", use "default", otherwise use id
 const serviceName = id === "express" ? "default" : id;
 
-// Build app.yaml content
-  const appYamlContent =
-  "runtime: nodejs\n" +
+// Build app.yaml content for Node.js Flex (no custom runtime)
+const appYamlContent =
+  "runtime: nodejs20\n" +               // Use latest Node.js runtime
   "env: flex\n" +
   `service: ${serviceName}\n\n` +
-  "runtime_config:\n" +
-  '  operating_system: "ubuntu24"\n' +
-  '  runtime_version: "24"\n' +
   "automatic_scaling:\n" +
-  "  min_total_instances: 1\n" +
-  "  max_total_instances: 3\n" +
-  "  cool_down_period: 120s\n" +
+  "  min_num_instances: 1\n" +
+  "  max_num_instances: 3\n" +
+  "  cool_down_period_sec: 120\n" +
   "  cpu_utilization:\n" +
   "    target_utilization: 0.6\n\n" +
   "resources:\n" +
