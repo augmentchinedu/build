@@ -56,11 +56,6 @@ const appYamlContent = `
 runtime: nodejs
 env: flex
 service: ${serviceName}
-
-resources:
-  cpu: 1
-  memory_gb: 1
-  disk_gb: 10
 `;
 await writeFile("/workspace/app.yaml", appYamlContent.trim());
 console.log(`app.yaml generated for App Engine Flex with service: ${serviceName}`);
