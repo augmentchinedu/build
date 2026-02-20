@@ -56,18 +56,18 @@ const serviceName = id === "express" ? "default" : id;
 const appYamlContent =
   "runtime: nodejs\n" +
   "env: flex\n" +
-  `service: ${serviceName}\n` +
-  "\n" +
-  "runtime_config:\n" +
-  '    operating_system: "ubuntu24"\n' +
-  '    runtime_version: "24"\n' +
-  "manual_scaling:\n" +
-  "   instances: 1\n" +
+  `service: ${serviceName}\n\n` +
+  "automatic_scaling:\n" +
+  "  min_num_instances: 1\n" +
+  "  max_num_instances: 3\n" +
+  "  cool_down_period_sec: 120\n" +
+  "  cpu_utilization:\n" +
+  "    target_utilization: 0.6\n\n" +
   "resources:\n" +
-  "   cpu: 1\n" +
-  "   memory_gb: 0.5\n" +
-  "   disk_size_gb: 10\n";
-
+  "  cpu: 1\n" +
+  "  memory_gb: 1\n" +
+  "  disk_size_gb: 10\n";
+  
 await writeFile("/workspace/app.yaml", appYamlContent);
 
 console.log(
