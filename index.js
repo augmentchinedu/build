@@ -1,11 +1,7 @@
 import { writeFile, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import fetch from "node-fetch";
-import { exec } from "node:child_process";
-import { promisify } from "node:util";
 
-const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
