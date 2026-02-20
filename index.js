@@ -44,7 +44,7 @@ const packageJson = {
 };
 
 // Write package.json
-const packagePath = `/workspace/package.json`;
+const packagePath = `./package.json`;
 await writeFile(packagePath, JSON.stringify(packageJson, null, 2));
 console.log(`package.json generated at ${packagePath}`);
 
@@ -64,7 +64,7 @@ if (process.env.DEPLOY_TARGET === "gae") {
     "  min_num_instances: 1\n" +
     "  max_num_instances: 3\n";
 
-  await writeFile("/workspace/app.yaml", appYamlContent);
+  await writeFile("./app.yaml", appYamlContent);
 
   console.log(
     `app.yaml generated for App Engine Flex with service: ${serviceName}`
@@ -96,7 +96,7 @@ if (process.env.DEPLOY_TARGET === "render") {
     "\n" +
     "    healthCheckPath: /\n";
 
-  await writeFile("/workspace/render.yaml", renderYamlContent);
+  await writeFile("./render.yaml", renderYamlContent);
 
   console.log(`render.yaml generated with service name: ${serviceName}`);
 } else {
@@ -106,6 +106,6 @@ if (process.env.DEPLOY_TARGET === "render") {
 }
 
 // Write client.name to a file for Docker ENV
-const namePath = `/workspace/CLIENT_NAME`;
+const namePath = `./CLIENT_NAME`;
 await writeFile(namePath, client.name, "utf-8");
 console.log(`client.name saved to ${namePath}`);
