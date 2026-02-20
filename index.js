@@ -48,6 +48,25 @@ const packagePath = `./package.json`;
 await writeFile(packagePath, JSON.stringify(packageJson, null, 2));
 console.log(`package.json generated at ${packagePath}`);
 
+console.log("Generating app.yaml (Flex)...");
+
+// If id is "express", use "default", otherwise use id
+const serviceName = id === "express" ? "default" : id;
+
+const appYamlContent =
+  "runtime: custom\n" +
+  "env: flex\n" +
+  `service: ${serviceName}\n` +
+  "\n" +
+  "automatic_scaling:\n" +
+  "  min_num_instances: 1\n" +
+  "  max_num_instances: 3\n";
+
+await writeFile("./app.yaml", appYamlContent);
+
+console.log(
+  `app.yaml generated for App Engine Flex with service: ${serviceName}`
+);
 
 // Write client.name to a file for Docker ENV
 const namePath = `./CLIENT_NAME`;
