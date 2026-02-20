@@ -15,6 +15,7 @@ await mkdir(workspaceDir, { recursive: true });
 
 // Environment variable: ID of the client
 const id = process.env.SERVICE_NAME;
+console.log(id)
 if (!id) {
   throw new Error("ID environment variable is required");
 }
