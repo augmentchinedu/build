@@ -48,44 +48,19 @@ const packagePath = `/workspace/package.json`;
 await writeFile(packagePath, JSON.stringify(packageJson, null, 2));
 console.log(`package.json generated at ${packagePath}`);
 
-// 3️⃣ Create Dockerfile for any environment
-const dockerfileContent = `
-FROM node:20-alpine
-
-WORKDIR /app
-
-COPY package.json ./
-
-RUN npm install --omit=dev
-
-COPY . .
-
-EXPOSE 3000
-
-ENV PORT=3000
-ENV NODE_ENV=production
-ENV NAME=${client.name}
-
-CMD ["node", "index.js"]
-`.trim();
-
-const dockerfilePath = `/workspace/Dockerfile`;
-await writeFile(dockerfilePath, dockerfileContent);
-console.log(`Dockerfile generated at ${dockerfilePath}`);
-
 console.log("Generating app.yaml (Flex)...");
 
 // If id is "express", use "default", otherwise use id
 const serviceName = id === "express" ? "default" : id;
 
 const appYamlContent =
-  "runtime: custom\n" +
+  "runtime: nodejs\n" +
   "env: flex\n" +
   `service: ${serviceName}\n` +
   "\n" +
-  "automatic_scaling:\n" +
-  "  min_num_instances: 1\n" +
-  "  max_num_instances: 3\n";
+  "runtime_config:\n" +
+  '    operating_system: "ubuntu24"\n' +
+  '    runtime_version: "24"\n';
 
 await writeFile("/workspace/app.yaml", appYamlContent);
 
