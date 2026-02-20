@@ -35,9 +35,6 @@ const packageJson = {
   type: "module",
   private: true,
   main: "index.js",
-  engines: {
-    node: "20.x" // <-- Match supported App Engine Flex runtime
-  },
   scripts: {
     start: "node index.js",
     build: client.buildScript || "vite build",
@@ -55,24 +52,15 @@ console.log(`package.json generated at ${packagePath}`);
 const serviceName = id === "express" ? "default" : id;
 
 // Build app.yaml content for Node.js Flex
-const appYamlContent =
-  "runtime: nodejs\n" +       // <-- runtime is generic "nodejs"
-  "env: flex\n" +
-  `service: ${serviceName}\n\n` +
-  "automaticScaling:\n" +
-  "  minTotalInstances: 1\n" +
-  "  maxTotalInstances: 3\n" +
-  "  coolDownPeriod: 120s\n" +
-  "  cpuUtilization:\n" +
-  "    targetUtilization: 0.6\n\n" +
-  "resources:\n" +
-  "  cpu: 1\n" +
-  "  memoryGb: 1\n" +
-  "  diskGb: 10\n\n" +
-  "beta_settings:\n" +
-  "  vm_runtime: nodejs20\n"; // <-- choose supported runtime here
+const appYamlContent = `
+runtime: nodejs
+env: flex
+service: ${serviceName}
 
-// Write app.yaml
-await writeFile("/workspace/app.yaml", appYamlContent);
-
+resources:
+  cpu: 1
+  memory_gb: 1
+  disk_gb: 10
+`;
+await writeFile("/workspace/app.yaml", appYamlContent.trim());
 console.log(`app.yaml generated for App Engine Flex with service: ${serviceName}`);
