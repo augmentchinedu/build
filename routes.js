@@ -13,8 +13,8 @@ const routes = {
     { path: "refreshToken", controller: "refreshToken" },
   ],
   client: [{ path: ":id", controller: "getClient" }],
-  game: [{ path: ":id", controller: "getGame" }],
-  user: [{ path: ":id", controller: "getUser" }],
+  games: [{ path: ":id", controller: "getGame" }],
+  users: [{ path: ":id", controller: "getUser" }],
   stores: [
     { path: "create", controller: "createStore" },
     { path: ":id", controller: "getStore" },
