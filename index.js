@@ -36,7 +36,7 @@ const packageJson = {
   private: true,
   main: "index.js",
   engines: {
-    node: "26.x" // Match App Engine Flex runtime
+    node: "24.x" // Match App Engine Flex runtime
   },
   scripts: {
     start: "node index.js",
@@ -58,9 +58,12 @@ const serviceName = id === "express" ? "default" : id;
 
 // Build app.yaml content for Node.js Flex (no custom runtime)
 const appYamlContent =
-  "runtime: nodejs26\n" + 
+  "runtime: nodejs24\n" + 
   "env: flex\n" +
   `service: ${serviceName}\n\n` +
+  "runtime_config:\n" +
+  '  operating_system: "ubuntu24"\n' +
+  '  runtime_version: "24"\n' +
   "automatic_scaling:\n" +
   "  min_num_instances: 1\n" +
   "  max_num_instances: 3\n" +
