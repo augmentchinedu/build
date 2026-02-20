@@ -54,20 +54,20 @@ console.log("Generating app.yaml (Flex)...");
 const serviceName = id === "express" ? "default" : id;
 
 const appYamlContent =
-  "runtime: custom\n" +
+  "runtime: nodejs20\n" +
   "env: flex\n" +
   `service: ${serviceName}\n\n` +
   "automatic_scaling:\n" +
-  "  min_num_instances: 1\n" +
-  "  max_num_instances: 3\n" +
-  "  cool_down_period_sec: 120\n" +
+  "  min_total_instances: 1\n" +
+  "  max_total_instances: 3\n" +
+  "  cool_down_period: 120s\n" +
   "  cpu_utilization:\n" +
   "    target_utilization: 0.6\n\n" +
   "resources:\n" +
   "  cpu: 1\n" +
   "  memory_gb: 1\n" +
   "  disk_size_gb: 10\n";
-
+  
 await writeFile("/workspace/app.yaml", appYamlContent);
 
 console.log(
