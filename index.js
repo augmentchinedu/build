@@ -73,8 +73,39 @@ if (process.env.DEPLOY_TARGET === "gae") {
   console.log("DEPLOY_TARGET is not 'gae'. Skipping app.yaml generation.");
 }
 
+// 5️⃣ Generate render.yaml only if target is Render
+if (process.env.DEPLOY_TARGET === "render") {
+  console.log("Render deployment target detected. Generating render.yaml...");
+
+  // If client.name is "express", use "default", otherwise use client.name
+  const serviceName = client.name === "express" ? "default" : client.name;
+
+  const renderYamlContent =
+    "services:\n" +
+    "  - type: web\n" +
+    `    name: ${serviceName}\n` +
+    "    env: docker\n" +
+    "    plan: starter\n" +
+    "    autoDeploy: true\n" +
+    "\n" +
+    "    envVars:\n" +
+    "      - key: NODE_ENV\n" +
+    "        value: production\n" +
+    "      - key: ID\n" +
+    `        value: ${id}\n` +
+    "\n" +
+    "    healthCheckPath: /\n";
+
+  await writeFile("/workspace/render.yaml", renderYamlContent);
+
+  console.log(`render.yaml generated with service name: ${serviceName}`);
+} else {
+  console.log(
+    "DEPLOY_TARGET is not 'render'. Skipping render.yaml generation."
+  );
+}
+
 // Write client.name to a file for Docker ENV
 const namePath = `/workspace/CLIENT_NAME`;
-await writeFile(namePath, client.name, 'utf-8');
+await writeFile(namePath, client.name, "utf-8");
 console.log(`client.name saved to ${namePath}`);
-
