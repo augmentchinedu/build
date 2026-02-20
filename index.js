@@ -60,7 +60,13 @@ const appYamlContent =
   "\n" +
   "runtime_config:\n" +
   '    operating_system: "ubuntu24"\n' +
-  '    runtime_version: "24"\n';
+  '    runtime_version: "24"\n' +
+  "manual_scaling:\n" +
+  "   instances: 1\n" +
+  "resources:\n" +
+  "   cpu: 1\n" +
+  "   memory_gb: 0.5\n" +
+  "   disk_size_gb: 10\n";
 
 await writeFile("/workspace/app.yaml", appYamlContent);
 
