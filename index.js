@@ -28,7 +28,7 @@ const client = await response.json();
 const dependencies = client.dependencies || {};
 const devDependencies = client.devDependencies || {};
 
-// Build package.json dynamically
+// Build package.json dynamically for Node.js 20
 const packageJson = {
   name: id,
   version: "1.0.0",
@@ -36,7 +36,7 @@ const packageJson = {
   private: true,
   main: "index.js",
   engines: {
-    node: "24.x" // Match App Engine Flex runtime
+    node: "20.x" // <-- Match supported App Engine Flex runtime
   },
   scripts: {
     start: "node index.js",
@@ -51,29 +51,26 @@ const packagePath = `/workspace/package.json`;
 await writeFile(packagePath, JSON.stringify(packageJson, null, 2));
 console.log(`package.json generated at ${packagePath}`);
 
-console.log("Generating app.yaml (Flex)...");
-
-// If id is "express", use "default", otherwise use id
+// Determine service name
 const serviceName = id === "express" ? "default" : id;
 
-// Build app.yaml content for Node.js Flex (no custom runtime)
+// Build app.yaml content for Node.js Flex
 const appYamlContent =
-  "runtime: nodejs24\n" + 
+  "runtime: nodejs\n" +       // <-- runtime is generic "nodejs"
   "env: flex\n" +
   `service: ${serviceName}\n\n` +
-  "runtime_config:\n" +
-  '  operating_system: "ubuntu24"\n' +
-  '  runtime_version: "24"\n' +
-  "automatic_scaling:\n" +
-  "  min_num_instances: 1\n" +
-  "  max_num_instances: 3\n" +
-  "  cool_down_period_sec: 120\n" +
-  "  cpu_utilization:\n" +
-  "    target_utilization: 0.6\n\n" +
+  "automaticScaling:\n" +
+  "  minTotalInstances: 1\n" +
+  "  maxTotalInstances: 3\n" +
+  "  coolDownPeriod: 120s\n" +
+  "  cpuUtilization:\n" +
+  "    targetUtilization: 0.6\n\n" +
   "resources:\n" +
   "  cpu: 1\n" +
-  "  memory_gb: 1\n" +
-  "  disk_size_gb: 10\n";
+  "  memoryGb: 1\n" +
+  "  diskGb: 10\n\n" +
+  "beta_settings:\n" +
+  "  vm_runtime: nodejs20\n"; // <-- choose supported runtime here
 
 // Write app.yaml
 await writeFile("/workspace/app.yaml", appYamlContent);
