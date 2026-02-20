@@ -1,4 +1,4 @@
-import "./routes.js";
+import "./router";
 import { writeFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname } from "node:path";
@@ -28,7 +28,7 @@ const client = await response.json();
 const dependencies = client.dependencies || {};
 const devDependencies = client.devDependencies || {};
 
-// Build package.json dynamically for Node.js 20
+// Build package.json dynamically
 const packageJson = {
   name: id,
   version: "1.0.0",
@@ -48,19 +48,47 @@ const packagePath = `/workspace/package.json`;
 await writeFile(packagePath, JSON.stringify(packageJson, null, 2));
 console.log(`package.json generated at ${packagePath}`);
 
-// Determine service name
+// 3️⃣ Create Dockerfile for any environment
+const dockerfileContent = `
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package.json ./
+
+RUN npm install --omit=dev
+
+COPY . .
+
+EXPOSE 3000
+
+ENV PORT=3000
+ENV NODE_ENV=production
+ENV NAME=${client.name}
+
+CMD ["node", "index.js"]
+`.trim();
+
+const dockerfilePath = `/workspace/Dockerfile`;
+await writeFile(dockerfilePath, dockerfileContent);
+console.log(`Dockerfile generated at ${dockerfilePath}`);
+
+console.log("Generating app.yaml (Flex)...");
+
+// If id is "express", use "default", otherwise use id
 const serviceName = id === "express" ? "default" : id;
 
-// Build app.yaml content for Node.js Flex
-const appYamlContent = `
-runtime: nodejs
-env: flex
-service: ${serviceName}
+const appYamlContent =
+  "runtime: custom\n" +
+  "env: flex\n" +
+  `service: ${serviceName}\n` +
+  "\n" +
+  "automatic_scaling:\n" +
+  "  min_num_instances: 1\n" +
+  "  max_num_instances: 3\n";
 
-resources:
-  cpu: 1
-  memory_gb: 1
-  disk_size_gb: 10
-`;
-await writeFile("/workspace/app.yaml", appYamlContent.trim());
-console.log(`app.yaml generated for App Engine Flex with service: ${serviceName}`);
+await writeFile("/workspace/app.yaml", appYamlContent);
+
+console.log(
+  `app.yaml generated for App Engine Flex with service: ${serviceName}`
+);
