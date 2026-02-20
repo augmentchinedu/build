@@ -35,6 +35,9 @@ const packageJson = {
   type: "module",
   private: true,
   main: "index.js",
+  engines: {
+    node: "24.x" // Match App Engine Flex runtime
+  },
   scripts: {
     start: "node index.js",
     build: client.buildScript || "vite build",
@@ -55,7 +58,7 @@ const serviceName = id === "express" ? "default" : id;
 
 // Build app.yaml content for Node.js Flex (no custom runtime)
 const appYamlContent =
-  "runtime: nodejs20\n" +               // Use latest Node.js runtime
+  "runtime: nodejs24\n" + 
   "env: flex\n" +
   `service: ${serviceName}\n\n` +
   "automatic_scaling:\n" +
@@ -72,6 +75,4 @@ const appYamlContent =
 // Write app.yaml
 await writeFile("/workspace/app.yaml", appYamlContent);
 
-console.log(
-  `app.yaml generated for App Engine Flex with service: ${serviceName}`
-);
+console.log(`app.yaml generated for App Engine Flex with service: ${serviceName}`);
