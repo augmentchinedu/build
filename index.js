@@ -1,13 +1,20 @@
 import "./routes.js";
-import { writeFile } from "node:fs/promises";
+import { writeFile, mkdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
-import { dirname } from "node:path";
+import { dirname, join } from "node:path";
+import fs from "fs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const id = process.env.ID;
+// Detect workspace: use /workspace if on GAE or Cloud Build, else cwd
+const workspaceDir = process.env.GAE_ENV || fs.existsSync("/workspace") ? "/workspace" : process.cwd();
 
+// Ensure workspace directory exists
+await mkdir(workspaceDir, { recursive: true });
+
+// Environment variable: ID of the client
+const id = process.env.ID;
 if (!id) {
   throw new Error("ID environment variable is required");
 }
@@ -15,16 +22,12 @@ if (!id) {
 console.log(`Fetching client config for: ${id}`);
 
 // Fetch client config from API
-const response = await fetch(
-  `https://dummy-rt2a.onrender.com/api/clients/${id}`
-);
-
+const response = await fetch(`https://dummy-rt2a.onrender.com/api/clients/${id}`);
 if (!response.ok) {
   throw new Error(`Failed to fetch client data: ${response.status}`);
 }
 
 const client = await response.json();
-
 const dependencies = client.dependencies || {};
 const devDependencies = client.devDependencies || {};
 
@@ -43,12 +46,16 @@ const packageJson = {
   devDependencies,
 };
 
+// Paths for generated files
+const packagePath = join(workspaceDir, "package.json");
+const dockerfilePath = join(workspaceDir, "Dockerfile");
+const appYamlPath = join(workspaceDir, "app.yaml");
+
 // Write package.json
-const packagePath = `/workspace/package.json`;
 await writeFile(packagePath, JSON.stringify(packageJson, null, 2));
 console.log(`package.json generated at ${packagePath}`);
 
-// 3️⃣ Create Dockerfile for any environment
+// Dockerfile content
 const dockerfileContent = `
 FROM node:20-alpine
 
@@ -69,15 +76,14 @@ ENV NAME=${client.name}
 CMD ["node", "index.js"]
 `.trim();
 
-const dockerfilePath = `/workspace/Dockerfile`;
+// Write Dockerfile
 await writeFile(dockerfilePath, dockerfileContent);
 console.log(`Dockerfile generated at ${dockerfilePath}`);
 
-console.log("Generating app.yaml (Flex)...");
-
-// If id is "express", use "default", otherwise use id
+// Determine service name
 const serviceName = id === "express" ? "default" : id;
 
+// app.yaml content
 const appYamlContent =
   "runtime: custom\n" +
   "env: flex\n" +
@@ -87,8 +93,6 @@ const appYamlContent =
   "  min_num_instances: 1\n" +
   "  max_num_instances: 3\n";
 
-await writeFile("/workspace/app.yaml", appYamlContent);
-
-console.log(
-  `app.yaml generated for App Engine Flex with service: ${serviceName}`
-);
+// Write app.yaml
+await writeFile(appYamlPath, appYamlContent);
+console.log(`app.yaml generated for App Engine Flex with service: ${serviceName}`);
