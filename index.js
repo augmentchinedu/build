@@ -44,9 +44,34 @@ const packageJson = {
 };
 
 // Write package.json
-const packagePath = `./package.json`;
+const packagePath = `/workspace/package.json`;
 await writeFile(packagePath, JSON.stringify(packageJson, null, 2));
 console.log(`package.json generated at ${packagePath}`);
+
+// 3️⃣ Create Dockerfile for any environment
+const dockerfileContent = `
+FROM node:20-alpine
+
+WORKDIR /app
+
+COPY package.json ./
+
+RUN npm install --omit=dev
+
+COPY . .
+
+EXPOSE 3000
+
+ENV PORT=3000
+ENV NODE_ENV=production
+ENV NAME=${client.name}
+
+CMD ["node", "index.js"]
+`.trim();
+
+const dockerfilePath = `/workspace/Dockerfile`;
+await writeFile(dockerfilePath, dockerfileContent);
+console.log(`Dockerfile generated at ${dockerfilePath}`);
 
 console.log("Generating app.yaml (Flex)...");
 
@@ -62,13 +87,8 @@ const appYamlContent =
   "  min_num_instances: 1\n" +
   "  max_num_instances: 3\n";
 
-await writeFile("./app.yaml", appYamlContent);
+await writeFile("/workspace/app.yaml", appYamlContent);
 
 console.log(
   `app.yaml generated for App Engine Flex with service: ${serviceName}`
 );
-
-// Write client.name to a file for Docker ENV
-const namePath = `./CLIENT_NAME`;
-await writeFile(namePath, client.name, "utf-8");
-console.log(`client.name saved to ${namePath}`);
