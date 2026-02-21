@@ -1,3 +1,4 @@
+import './routes.js'
 import { writeFile, readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
