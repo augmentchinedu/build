@@ -1,0 +1,50 @@
+#!/bin/sh
+
+CURRENT_BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+SEARCH_DIR="$(pwd)"
+TARGET_DIR=""
+
+# Walk upward looking for a package.json that actually has our test script
+while [ "$SEARCH_DIR" != "/" ]; do
+  if [ -f "$SEARCH_DIR/package.json" ]; then
+    # Does this package.json contain the test:run script?
+    if grep -q '"test:run"' "$SEARCH_DIR/package.json"; then
+      TARGET_DIR="$SEARCH_DIR"
+      break
+    fi
+  fi
+  SEARCH_DIR="$(dirname "$SEARCH_DIR")"
+done
+
+# If we never found the real project root, skip safely
+if [ -z "$TARGET_DIR" ]; then
+  echo "ℹ️ No root package.json with test:run found, skipping tests."
+  exit 0
+fi
+
+cd "$TARGET_DIR" || exit 1
+
+echo "🚀 Running Vitest from $TARGET_DIR (branch: $CURRENT_BRANCH)"
+
+# ---- Branch behaviour (optional, but now truly branch-agnostic) ----
+case "$CURRENT_BRANCH" in
+  main)
+    echo "🔒 Strict test run for main"
+    npm run test:run
+    ;;
+  dev)
+    echo "🧪 Standard test run for dev"
+    npm run test:run
+    ;;
+  *)
+    echo "⚡ Running tests for branch: $CURRENT_BRANCH"
+    npm run test:run -- --passWithNoTests
+    ;;
+esac
+
+if [ $? -ne 0 ]; then
+  echo "❌ Tests failed. Push blocked."
+  exit 1
+fi
+
+echo "✅ Tests passed."
