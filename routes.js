@@ -8,16 +8,16 @@ const __dirname = dirname(__filename);
 // Import or define routes
 const routes = {
   auth: [
-    { path: "signin", controller: "signIn" },
-    { path: "signup", controller: "signUp" },
-    { path: "refreshToken", controller: "refreshToken" },
+    { path: "signin", controller: "signIn", method: "post" },
+    { path: "signup", controller: "signUp", method: "post" },
+    { path: "refreshToken", controller: "refreshToken", method: "post" },
   ],
-  client: [{ path: ":id", controller: "getClient" }],
-  games: [{ path: ":id", controller: "getGame" }],
-  users: [{ path: ":id", controller: "getUser" }],
+  client: [{ path: ":id", controller: "getClient", method: "get" }],
+  games: [{ path: ":id", controller: "getGame", method: "get" }],
+  users: [{ path: ":id", controller: "getUser", method: "get" }],
   stores: [
-    { path: "create", controller: "createStore" },
-    { path: ":id", controller: "getStore" },
+    { path: "create", controller: "createStore", method: "post" },
+    { path: ":id", controller: "getStore", method: "get" },
   ],
 };
 
@@ -27,16 +27,16 @@ await mkdir(routerDir, { recursive: true });
 
 // Build router file content
 let content = `
-import express from "express";
-const router = express.Router();
+import { Hono } from "hono";
+const router = new Hono();
 `;
 
 // For each microservice
 for (const [service, routesArr] of Object.entries(routes)) {
-  routesArr.forEach(({ path, controller }) => {
+  routesArr.forEach(({ path, controller, method }) => {
     content += `
 import { ${controller} } from "../controllers/${service}/${controller}.js";
-router.use("/${service}/${path}", ${controller});
+router.${method}("/${service}/${path}", ${controller});
 `;
   });
 }
