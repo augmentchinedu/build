@@ -32,9 +32,14 @@ const router = new Hono();
 // Generate API routes
 for (const [service, routesArr] of Object.entries(routes)) {
   routesArr.forEach(({ path, controller, method }) => {
+    const routePath =
+      service === "health"
+        ? "api/v1/health"
+        : `api/v1/${service}${path ? `/${path}` : ""}`;
+
     content += `
 import { ${controller} } from "../controllers/${service}/${controller}.js";
-router.${method}("/${service}/${path}", ${controller});
+router.${method}("${routePath}", ${controller});
 `;
   });
 }
